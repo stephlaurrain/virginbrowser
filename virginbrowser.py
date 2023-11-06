@@ -29,11 +29,12 @@ class Bot:
         #def __init__(self):                
 
         def trace(self,stck):                
-                self.log.lg(f"{stck.function} ({ stck.filename}-{stck.lineno})")
+                self.log.lg(f"{stck[0].function} ({ stck[0].filename}-{stck[0].lineno})")
 
         # init
         @_error_decorator()
-        def init_webdriver(self, chrome_profile):
+        def init_webdriver(self, chrome_profile): 
+                self.trace(inspect.stack())               
                 options = webdriver.ChromeOptions()
                 if (self.jsprms.prms['headless']):
                         options.add_argument("--headless")
@@ -62,22 +63,25 @@ class Bot:
                  
                 return driver
         
+        @_error_decorator()
+        def remove_logs(self):
+                self.trace(inspect.stack())
+                keep_log_time = self.jsprms.prms['keep_log']['time']
+                keep_log_unit = self.jsprms.prms['keep_log']['unit']
+                self.log.lg(f"=>clean logs older than {keep_log_time} {keep_log_unit}")                        
+                file_utils.remove_old_files(f"{self.root_app}{os.path.sep}log", keep_log_time, keep_log_unit)   
+
         def init_main(self, jsonfile):
                 try:
                         self.root_app = os.getcwd()
                         self.log = mylog.Log()
                         self.log.init(jsonfile)
-                        self.trace(inspect.stack()[0])
+                        # self.trace(inspect.stack())
                         jsonFn = f"{self.root_app}{os.path.sep}data{os.path.sep}conf{os.path.sep}{jsonfile}.json"                        
                         self.jsprms = jsonprms.Prms(jsonFn)
                         self.log.lg("=HERE WE GO=")                        
-                        keep_log_time = self.jsprms.prms['keep_log']['time']
-                        keep_log_unit = self.jsprms.prms['keep_log']['unit']
-                        self.log.lg(f"=>clean logs older than {keep_log_time} {keep_log_unit}")   
-                        file_utils.remove_old_files(f"{self.root_app}{os.path.sep}log", keep_log_time, keep_log_unit)
-                        wait_node = self.jsprms.prms['wait']
-                        print(wait_node['offset'])
-                        self.humanize = Humanize(self.trace, self.log, wait_node['offset'], wait_node['time'], wait_node['default'])
+                        self.remove_logs()
+                        
                 except Exception as e:
                         self.log.errlg(f"Wasted ! : {e}")
                         raise
@@ -100,8 +104,11 @@ class Bot:
         def main(self, command="", jsonfile="", param_lst=[]):                          
                 try:
                         print("params=", command, jsonfile, param_lst)
+                                        
                         self.init_main(jsonfile)
-                        self.trace(inspect.stack()[0])                        
+                        self.trace(inspect.stack())
+                        # wait_node = self.jsprms.prms['wait']
+                        # self.humanize = Humanize(self.trace, self.log, wait_node['offset'], wait_node['time'], wait_node['default'])
                         
                         if (command == "browse"):
                                 profile_node = self.jsprms.prms['profiles']
@@ -111,8 +118,9 @@ class Bot:
                                 for idx, prof in enumerate(profile_node):
                                         if int(choice) == idx: 
                                                 print(f"Choosen {idx} - {prof['name']}")
-                                                prof = prof['profile'] if prof['profile']!="" else None
-                                                self.driver = self.init_webdriver(prof)
+                                                profile = prof['profile'] if prof['profile']!="" else None
+                                                self.driver = self.init_webdriver(profile)
+                                                print(prof['url'])
                                                 self.driver.get(prof['url'])                                                
                                 input("Let u browsing, waiting 4 k to end : ")
                                 if hasattr(self, 'driver') and self.driver is not None:
