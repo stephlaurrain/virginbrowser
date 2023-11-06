@@ -112,9 +112,10 @@ class Bot:
                         
                         if (command == "browse"):
                                 profile_node = self.jsprms.prms['profiles']
+                                print("\n\n===Profiles list===\n")
                                 for idx, prof in enumerate(profile_node):
                                         print(f"{idx} - {prof['name']}")
-                                choice = input("\nP134$3 $313(7 profile number : ")
+                                choice = input("\nPlease select profile number : ")
                                 for idx, prof in enumerate(profile_node):
                                         if int(choice) == idx: 
                                                 print(f"Choosen {idx} - {prof['name']}")
