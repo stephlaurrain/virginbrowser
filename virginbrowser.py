@@ -2,6 +2,7 @@
 
 import os
 from os import path
+import time
 import sys
 import random
 from datetime import datetime
@@ -22,6 +23,8 @@ import utils.img_utils as img_utils
 from utils.humanize import Humanize
 from utils.mydecorators import _error_decorator
 from selenium.webdriver.common.action_chains import ActionChains
+import watchdog.observers
+import watchdog.events
 
 
 class Bot:
@@ -53,7 +56,8 @@ class Bot:
                         prefs = {"profile.managed_default_content_settings.images": 2}
                         options.add_experimental_option("prefs", prefs)
                 # options.add_argument(f"user-agent={self.jsprms.prms['user_agent']}")
-                options.add_argument("--start-maximized")
+                options.add_argument("--start-maximized")       
+                # options.binary_location = "/usr/bin/brave-browser"          
                 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)                
                 driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
                 # resolve unreachable
@@ -100,6 +104,26 @@ class Bot:
                 file = tarfile.open(arch)
                 file.extractall(f"{self.root_app}{os.path.sep}")
                 file.close()
+        
+        def handler(self, event):
+                if event.is_directory:
+                        self.driver.refresh()
+                        return
+
+        @_error_decorator()
+        def autorefresh(self, path_to_check):    
+                event_handler = watchdog.events.FileSystemEventHandler()
+                event_handler.on_modified = self.handler
+
+                observer = watchdog.observers.Observer()
+                observer.schedule(event_handler, path=path_to_check, recursive=True)
+                observer.start()
+                try:
+                        while True:
+                                time.sleep(1)
+                except KeyboardInterrupt:
+                        observer.stop()
+                        observer.join()
 
         def main(self, command="", jsonfile="", param_lst=[]):                          
                 try:
@@ -121,8 +145,12 @@ class Bot:
                                                 print(f"Choosen {idx} - {prof['name']}")
                                                 profile = prof['profile'] if prof['profile']!="" else None
                                                 self.driver = self.init_webdriver(profile)
-                                                print(prof['url'])
-                                                self.driver.get(prof['url'])                                                
+                                                print(prof['url'])                                                
+                                                self.driver.get(prof['url'])   
+                                                if prof['autorefresh']:
+                                                        self.autorefresh(prof['pathtocheck'])
+
+
                                 input("Let u browsing, waiting 4 k to end : ")
                                 if hasattr(self, 'driver') and self.driver is not None:
                                         self.driver.close()
