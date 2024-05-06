@@ -1,32 +1,36 @@
 {
-    "test":false,   
+    "test": false,
     "keep_log": {
-        "time":1,    
-        "unit":"m"
-    },             
+        "time": 1,
+        "unit": "m"
+    },
     "profiles": [
-        {
-            "name": "pomodoro",
-            "profile": "generic",
-            "url" : "https://www.minuteur-en-ligne.fr/minuteurs-pomodoro"
-        },
-        {
-            "name": "gmail",
-            "profile": "gmail1",
-            "url": "https://gmail.com"
-        },
         {
             "name": "noprofile",
             "profile": "",
-            "url": "https://lemonde.fr"
-        }
-    ],     
-    "wait":{
-        "default":25,
-        "offset":25,
-        "time":10,
-        "implicitly":10
-    },         
-    "headless":false,
-    "box":false
+            "url": "https://google.fr",
+            "autorefresh":"false"
+        },
+        {
+            "name": "dev",
+            "profile": "dev",
+            "url": "http://localhost",
+            "autorefresh":"true",
+            "pathtocheck":"path to code root"
+        },
+        {
+            "name": "withprofile",
+            "profile": "withadblockers",
+            "url": "https://google.fr",
+            "autorefresh":"false"
+        }        
+    ],
+    "wait": {
+        "default": 25,
+        "offset": 25,
+        "time": 10,
+        "implicitly": 10
+    },
+    "headless": false,
+    "box": false
 }
