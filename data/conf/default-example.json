@@ -9,20 +9,20 @@
             "name": "noprofile",
             "profile": "",
             "url": "https://google.fr",
-            "autorefresh":"false"
+            "autorefresh":false
         },
         {
             "name": "dev",
             "profile": "dev",
             "url": "http://localhost",
-            "autorefresh":"true",
+            "autorefresh":true,
             "pathtocheck":"path to code root"
         },
         {
             "name": "withprofile",
             "profile": "withadblockers",
             "url": "https://google.fr",
-            "autorefresh":"false"
+            "autorefresh":false
         }        
     ],
     "wait": {

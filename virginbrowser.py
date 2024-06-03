@@ -146,8 +146,8 @@ class Bot:
                                                 profile = prof['profile'] if prof['profile']!="" else None
                                                 self.driver = self.init_webdriver(profile)
                                                 print(prof['url'])                                                
-                                                self.driver.get(prof['url'])   
-                                                if prof['autorefresh']:
+                                                self.driver.get(prof['url'])             
+                                                if prof['autorefresh']:                                                        
                                                         self.autorefresh(prof['pathtocheck'])
 
 
