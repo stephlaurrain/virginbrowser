@@ -1,28 +1,15 @@
 # -*-coding:utf-8 -*
 
 import os
-from os import path
 import time
-import sys
-import random
-from datetime import datetime
-from time import sleep
 import inspect
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.by import By 
-from selenium.webdriver.support.ui import WebDriverWait 
-from selenium.webdriver.support import expected_conditions as EC 
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.keys import Keys
 import utils.file_utils as file_utils
 import utils.mylog as mylog
 import utils.jsonprms as jsonprms
-import utils.img_utils as img_utils
-from utils.humanize import Humanize
 from utils.mydecorators import _error_decorator
-from selenium.webdriver.common.action_chains import ActionChains
 import watchdog.observers
 import watchdog.events
 
@@ -42,19 +29,15 @@ class Bot:
                 if (self.jsprms.prms['headless']):
                         options.add_argument("--headless")
                 else:
-                        if chrome_profile != None:
+                        if chrome_profile is not None:
                                 options.add_argument(f"user-data-dir=./data{os.path.sep}profiles{os.path.sep}{chrome_profile}")
                 # anti bot detection
                 options.add_argument('--disable-blink-features=AutomationControlled')
                 options.add_experimental_option("excludeSwitches", ["enable-automation"])
                 options.add_experimental_option('useAutomationExtension', False)
-                # pi / docker
-                if (self.jsprms.prms['box']):
-                        options.add_argument("--no-sandbox")
-                        options.add_argument("--disable-dev-shm-usage")
-                        options.add_argument("--disable-gpu")
-                        prefs = {"profile.managed_default_content_settings.images": 2}
-                        options.add_experimental_option("prefs", prefs)
+                options.add_argument("--disable-web-security")
+                options.add_argument("--disable-site-isolation-trials")
+                # pi / docker               
                 # options.add_argument(f"user-agent={self.jsprms.prms['user_agent']}")
                 options.add_argument("--start-maximized")       
                 # options.binary_location = "/usr/bin/brave-browser"          
@@ -78,7 +61,7 @@ class Bot:
         def init_main(self, jsonfile):
                 try:
                         self.root_app = os.getcwd()
-                        self.log = mylog.Log()
+                        self.log = mylog.Log(self.root_app)
                         self.log.init(jsonfile)
                         # self.trace(inspect.stack())
                         jsonFn = f"{self.root_app}{os.path.sep}data{os.path.sep}conf{os.path.sep}{jsonfile}.json"                        
@@ -136,9 +119,12 @@ class Bot:
                         
                         if (command == "browse"):
                                 profile_node = self.jsprms.prms['profiles']
-                                print("\n\n===Profiles list===\n")
+                                hardgreen = "\033[32m\033[1m"
+                                normalgreen = "\033[32m\033[2m"
+                                normalcolor = "\033[0m"
+                                print(f"{hardgreen}\n\n===Profiles list===\n")                                                                    
                                 for idx, prof in enumerate(profile_node):
-                                        print(f"{idx} - {prof['name']}")
+                                        print(f"{normalgreen}{idx} - {prof['name']}")
                                 choice = input("\nPlease select profile number : ")
                                 for idx, prof in enumerate(profile_node):
                                         if int(choice) == idx: 
@@ -150,7 +136,7 @@ class Bot:
                                                 if prof['autorefresh']:                                                        
                                                         self.autorefresh(prof['pathtocheck'])
 
-
+                                print(f"{normalcolor}\n")                                                                    
                                 input("Let u browsing, waiting 4 k to end : ")
                                 if hasattr(self, 'driver') and self.driver is not None:
                                         self.driver.close()
