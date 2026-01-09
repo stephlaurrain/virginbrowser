@@ -5,7 +5,8 @@ import time
 import inspect
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+# from webdriver_manager.chrome import ChromeDriverManager
+import undetected_chromedriver as uc
 import utils.file_utils as file_utils
 import utils.mylog as mylog
 import utils.jsonprms as jsonprms
@@ -25,24 +26,17 @@ class Bot:
         @_error_decorator()
         def init_webdriver(self, chrome_profile): 
                 self.trace(inspect.stack())               
-                options = webdriver.ChromeOptions()
-                if (self.jsprms.prms['headless']):
-                        options.add_argument("--headless")
-                else:
-                        if chrome_profile is not None:
-                                options.add_argument(f"user-data-dir=./data{os.path.sep}profiles{os.path.sep}{chrome_profile}")
-                # anti bot detection
-                options.add_argument('--disable-blink-features=AutomationControlled')
-                options.add_experimental_option("excludeSwitches", ["enable-automation"])
-                options.add_experimental_option('useAutomationExtension', False)
-                options.add_argument("--disable-web-security")
-                options.add_argument("--disable-site-isolation-trials")
+                options = uc.ChromeOptions()                      
+                # options.add_argument("--disable-web-security")               
                 # pi / docker               
                 # options.add_argument(f"user-agent={self.jsprms.prms['user_agent']}")
-                options.add_argument("--start-maximized")       
-                # options.binary_location = "/usr/bin/brave-browser"          
-                driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)                
-                driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+                options.add_argument("--start-maximized")                                                      
+                if chrome_profile is not None:                        
+                        full_profile_path = os.path.join(self.root_app, "data", "profiles", chrome_profile)
+                        driver = uc.Chrome(user_data_dir=full_profile_path, options=options)
+                else:
+                        driver = uc.Chrome(options=options)
+                # driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
                 # resolve unreachable
                 driver.set_window_size(1900, 1080)
                 # driver.set_window_position(0, 0, windowHandle=) #, windowHandle='current')
